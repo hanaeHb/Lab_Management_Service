@@ -1,0 +1,21 @@
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: r1
+              uri: http://localhost:8081
+              predicates:
+                - Path= /v1/enseignants/**
+
+            - id: r2
+              uri: http://localhost:8082
+              predicates:
+                - Path= /v1/chercheurs/**
+
+            - id: r3
+              uri: http://localhost:8083
+              predicates:
+                - Path= /v1/projets/**
+
