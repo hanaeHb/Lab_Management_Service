@@ -1,41 +1,38 @@
-name: Java CI with SonarQube
+name: SonarQube Analysis
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   pull_request:
-    branches: [ main ]
 
 jobs:
-  build:
+  sonar:
+    name: SonarQube Scan
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      # Checkout repo
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Set up JDK 24
-      uses: actions/setup-java@v3
-      with:
-        java-version: '24'
-        distribution: 'temurin'
+      #  Setup Java 17
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
-    - name: Cache Maven packages
-      uses: actions/cache@v3
-      with:
-        path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-maven-
+      #  Build project with Maven
+      - name: Build with Maven
+        run: mvn -B clean verify
 
-    - name: Build with Maven
-      run: mvn clean verify
-
-    - name: SonarQube Scan
-      uses: SonarSource/sonarcloud-github-action@master
-      with:
-        args: >
-          -Dsonar.projectKey=TON_PROJECT_KEY
-          -Dsonar.organization=TON_ORG
-          -Dsonar.host.url=https://SONARQUBE_URL
+      #  SonarQube Scan
+      - name: SonarQube Scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn sonar:sonar \
+          -Dsonar.projectKey=etudiant_service \
+          -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
           -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+          -Dsonar.projectKey=DevopsPipeLine
